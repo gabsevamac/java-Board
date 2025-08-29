@@ -32,7 +32,6 @@ public class BoardService {
         }
 
         Board board = new Board(req.boardName(), columns);
-        //!Talvez n salve direito.
         repository.save(board);
     }
 
@@ -57,10 +56,18 @@ public class BoardService {
         var updatedCards = previousCardColumn.getCards().remove(card);
         boardColumnService.updateColumn(previousCardColumn);
 
-        checkNextColumn();
+        var newColumn = checkNextColumn(previousCardColumn, columns, isCancelled);
     }
 
-    private ColumnType checkNextColumn( List<BoardColumn> columns, boolean isCancelled){
+    private BoardColumn checkNextColumn(BoardColumn previousCardColumn, List<BoardColumn> columns, boolean isCancelled){
+        if(isCancelled){
+            return columns.stream()
+                    .filter(column -> column.getColumnType().equals(ColumnType.CANCELAMENTO))
+                    .findFirst()
+                    .orElseThrow(() -> new DataNotFoundException("Column not found!"));
+        }
+        int previousIndex = columns.indexOf(previousCardColumn);
+        return columns.get(previousIndex + 1);
 
     }
 
